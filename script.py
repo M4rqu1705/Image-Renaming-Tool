@@ -46,11 +46,16 @@ def perform_renaming(*args):
     old_name = widgets['image_name_label']['text'].split('\n')[-1]
     f_name, f_ext = old_name.split('.')
 
-    if '.' not in [new_name[-4], new_name[-3], new_name[-2]]:
-        new_name += "." + f_ext
+    if '.' not in new_name:
+        try:
+            if '.' not in [new_name[-4], new_name[-3]]:
+                new_name += "." + f_ext
+        except:
+            new_name += "." + f_ext
 
-    if new_name not in image_paths and ['<','>',':','"','/','\\','|','?','*'] not in new_name:
+    if new_name not in image_paths and all(char not in ['<','>',':','"','/','\\','|','?','*'] for char in new_name):
         os.rename(f"{old_name}", f"{new_name}")
+        widgets['history_label']['text'] += f"\n[>>] Renamed '{old_name}' to '{new_name}'"
 
         image_index = image_paths.index(old_name)
         image_paths[image_index] = new_name
@@ -60,7 +65,8 @@ def perform_renaming(*args):
         index = image_paths.index(new_name)
         next_image(); previous_image(); cancel_renaming()
     else:
-        sys.stderr.write(f"COULD NOT RENAME IMAGE! {new_name} is already in use")
+        sys.stderr.write(f"COULD NOT RENAME IMAGE! '{new_name}' is already in use")
+        widgets['history_label']['text'] += f"\n[!!] Could not rename image!  '{new_name}' is already in use or invalid character used"
 
 
 def cancel_renaming(*args):
@@ -72,13 +78,13 @@ def cancel_renaming(*args):
 
 
 def folder_dialog(*args):
-    global image_paths, widgets
+    global root, image_paths, widgets
     folder = tkinter.filedialog.askdirectory(initialdir='..', title='Where did you locate your images?')
     if folder.strip() not in ["", None]:
-        widgets['current_directory_label']['text'] = folder
+        temp = "/".join(folder.split('/')[-2:])
+        widgets['current_directory_label']['text'] = temp
+        widgets['history_label']['text'] += f"\n[>>] Moved to new folder '{temp}'"
         os.chdir(folder)
-    image_index = image_paths.index(old_name)
-    image_paths[image_index] = new_name
 
 
 def process_image(img_path, desired_size):
@@ -155,10 +161,20 @@ def main():
             text="/".join(os.getcwd().split('\\')),
             font=("Verdana", 18),
             justify="left",
-            background="white",
+            background="#FFFFFF",
             borderwidth=2,
             relief="solid",
-            wraplength=max_width*0.240234
+            wraplength=max_width*0.240234)
+    history_label = tk.Label(
+            root,
+            text="",
+            font=("Verdana", 18),
+            justify="left",
+            background="#FFFFFF",
+            borderwidth=2,
+            relief="solid",
+            wraplength=max_width*0.301432,
+            anchor='s'
             )
 
     # ENTRY
@@ -167,8 +183,7 @@ def main():
             font=("Verdana", 20),
             justify="left",
             borderwidth=3,
-            relief="solid"
-            )
+            relief="solid")
     entry_label.focus_set()
     entry_label.insert(0," ")
 
@@ -224,6 +239,7 @@ def main():
             "control_panel_background":control_panel_background,
             "image_label":image_label,
             "image_name_label":image_name_label,
+            "history_label":history_label,
             "entry_label":entry_label,
             "current_directory_label":current_directory_label,
             "ok_button":ok_button,
@@ -265,6 +281,12 @@ def main():
             y = max_height*0.074074,
             width = max_width*0.278646,
             height = max_height*0.055556)
+
+    history_label.place(
+            x = max_width*0.653646,
+            y = max_height*0.33912,
+            width = max_width*0.301432,
+            height = max_height*0.16088)
 
     entry_label.place(
             x = max_width*0.653646,
