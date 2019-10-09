@@ -4,6 +4,18 @@ from PIL import Image, ImageTk
 import sys
 import os
 
+def update_image_paths():
+    global image_paths, widgets
+    
+    image_paths = os.listdir('.')
+
+    for path in range(len(image_paths)-1, -1, -1):
+        if not any(image_paths[path].endswith(img_format) for img_format in ['.jpeg', '.jpg', '.png', '.gif']):
+            image_paths.pop(path)
+
+    if len(image_paths) == 0:
+        widgets['history_label']['text'] += f"\n[!!] Did not find images in current directory!!"
+
 
 def next_image(*args):
     global image_paths, index, root, widgets
@@ -85,6 +97,7 @@ def folder_dialog(*args):
         widgets['current_directory_label']['text'] = temp
         widgets['history_label']['text'] += f"\n[>>] Moved to new folder '{temp}'"
         os.chdir(folder)
+        update_image_paths()
 
 
 def process_image(img_path, desired_size):
@@ -164,7 +177,8 @@ def main():
             background="#FFFFFF",
             borderwidth=2,
             relief="solid",
-            wraplength=max_width*0.240234)
+            wraplength=max_width*0.240234,
+            anchor='n')
     history_label = tk.Label(
             root,
             text="",
@@ -339,7 +353,8 @@ if __name__ == "__main__":
 
     # Declare and initialize globals for later use
     os.chdir('./images')
-    image_paths = os.listdir('.')
+    image_paths = ""
+    update_image_paths()
     index = 0
     root = tk.Tk()
     widgets = dict()
