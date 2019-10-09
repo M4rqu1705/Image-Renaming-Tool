@@ -19,7 +19,7 @@ def next_image(self):
     image = ImageTk.PhotoImage(image=process_image(img_path, widgets["image_label"].winfo_height()))
     widgets["image_label"].config(image=image)
     widgets["image_label"].image = image
-    widgets["image_name_label"].config(text=f'Image Name\n{image_name}')
+    widgets["image_name_label"].config(text=image_name)
 
 
 def previous_image(self):
@@ -36,7 +36,7 @@ def previous_image(self):
     image = ImageTk.PhotoImage(image=process_image(img_path, widgets["image_label"].winfo_height()))
     widgets["image_label"].config(image=image)
     widgets["image_label"].image = image
-    widgets["image_name_label"].config(text=f'Image Name\n{image_name}')
+    widgets["image_name_label"].config(text=image_name)
 
 
 def perform_renaming(self):
@@ -95,7 +95,7 @@ def process_image(img_path, desired_size):
         img_path.replace('\\', '/')
     if not os.path.isfile(img_path):
         sys.stderr.write(f"Provided image file path '{img_path}' does not exist. Try fixing it")
-        return Image.new("RGB", (desired_size, desired_size))
+        return Image.new("HEX", (desired_size, desired_size), "#7C0A02")
 
     # Get and process image
     image = Image.open(img_path)
@@ -106,7 +106,7 @@ def process_image(img_path, desired_size):
     # Actually resize image in place
     image.thumbnail(new_size, Image.ANTIALIAS)
     # Create new black square
-    new_image = Image.new("RGB", (desired_size, desired_size))
+    new_image = Image.new("RGB", (desired_size, desired_size), "#7C0A02")
     # Paste resized image into black square
     new_image.paste(image, (int(desired_size-new_size[0])//2, int(desired_size-new_size[1])//2))
 
@@ -127,7 +127,8 @@ def main():
     root.bind('<Control-o>', file_dialog)
 
     max_width, max_height = root.maxsize()
-    desired_size = int(max_height*5/6)
+    print(max_width, ",", max_height)
+    desired_size = max_height
 
     # IMAGE
     img_path = image_paths[index]
@@ -138,21 +139,38 @@ def main():
             root,
             image=image,
             height=desired_size,
-            borderwidth=2,
-            relief="solid")
+            width=desired_size)
+
+    # DECORATIVE FRAMES
+    image_background = tk.Frame(
+            root,
+            background="#7C0A02"
+            )
+    left_frame = tk.Frame(
+            root,
+            background="#B22222",
+            )
+    right_frame = tk.Frame(
+            root,
+            background="#E25822",
+            )
+    control_panel_background = tk.Frame(
+            root,
+            background="#F1BC31"
+            )
 
     # IMAGE NAME LABEL
     label_width = max_width//3
     image_name_label = tk.Label(
             root,
-            text=f'Image Name\n{image_name}',
-            font=("Verdana", 16),
-            justify="center")
+            text=image_name,
+            font=("Verdana", 20),
+            justify="left")
 
     # NEW NAME ENTRY
     entry_label = tk.Entry(
             root,
-            font=("Verdana", 14),
+            font=("Verdana", 20),
             justify="left",
             borderwidth=3,
             relief="solid"
@@ -176,39 +194,39 @@ def main():
     ok_button = tk.Button(
             root,
             text = "Ok",
-            font=("Verdana", 14),
+            font=("Verdana", 18),
             justify="left",
             command = perform_renaming,
             borderwidth = 2,
             relief = "groove",
-            background = "green")
+            background = "#39D521")
 
     cancel_button = tk.Button(root,
             text = "Cancel",
-            font=("Verdana", 14),
+            font=("Verdana", 18),
             justify="left",
             command = cancel_renaming,
             borderwidth = 2,
             relief = "groove",
-            background = "red")
+            background = "#B22222")
 
     previous_image_button = tk.Button(root,
             text = "<",
-            font=("Verdana", 14),
+            font=("Verdana", 18),
             justify="center",
             command = previous_image,
             borderwidth = 2,
             relief = "groove",
-            background = "gray")
+            background = "#E25822")
 
     next_image_button = tk.Button(root,
             text = ">",
-            font=("Verdana", 14),
+            font=("Verdana", 18),
             justify="center",
             command = next_image,
             borderwidth = 2,
             relief = "groove",
-            background = "gray")
+            background = "#E25822")
 
     folder_open_button = tk.Button(root,
             text = "Open Folder",
@@ -233,46 +251,86 @@ def main():
             }
 
     # POSITIONING
+    # max_height = 864, max_width = 1536
+    #  image_background.place(
+            #  x=0,
+            #  y=0,
+            #  width=desired_size,
+            #  height=desired_size
+            #  )
+
+    left_frame.place(
+            x = max_width*0.5625,
+            y = 0,
+            width = max_width*0.03125,
+            height = max_height*1
+            )
+
+    right_frame.place(
+            x = max_width*0.59375,
+            y = 0,
+            width = max_width*0.03125,
+            height = max_height*1
+            )
+
+    control_panel_background.place(
+            x = max_width*0.625,
+            y = 0,
+            width = max_width*0.375,
+            height = max_height
+            )
+
     image_label.place(
-            x = (max_height-desired_size)//6,
-            y = (max_height-desired_size)//3,
-            height = desired_size,
-            width = desired_size)
+            x = 0,
+            y = 0,
+            width = desired_size,
+            height = desired_size)
 
     image_name_label.place(
-            x = (max_width*47//80),
-            y = (max_height-desired_size)*5//6,
-            width = label_width)
+            x = max_width*0.661458,
+            y = max_height*0.074074,
+            width = max_width*0.278646,
+            height = max_height*0.055556
+            )
 
     entry_label.place(
-            x = (max_width*47//80),
-            y = (max_height-desired_size)*8//6,
-            width = label_width)
+            x = max_width*0.653646,
+            y = max_height*0.143519,
+            width = max_width*0.301432,
+            height = max_height*0.074074)
+
+    previous_image_button.place(
+            x = max_width*0.653646,
+            y = max_height*0.231481,
+            width = max_width*0.041667,
+            height = max_height*0.075231
+            )
+
+    next_image_button.place(
+            x = max_width*0.913411,
+            y = max_height*0.231481,
+            width = max_width*0.041667,
+            height = max_height*0.075231
+            )
+
+    ok_button.place(
+            x = max_width*0.716146,
+            y = max_height*0.231481,
+            width = max_width*0.067057,
+            height = max_height*0.074074
+            )
+
+    cancel_button.place(
+            x = max_width*0.797526,
+            y = max_height*0.231481,
+            width = max_width*0.095052,
+            height = max_height*0.074074
+            )
 
     current_directory_label.place(
             x = (max_width*54)//80,
             y = (max_height*8)//10,
             width = (max_width*20)//80
-            )
-
-    ok_button.place(
-            x = (max_width*57//80),
-            y = (max_height-desired_size)*10//6
-            )
-
-    cancel_button.place(
-            x = (max_width*60//80),
-            y = (max_height-desired_size)*10//6
-            )
-
-    previous_image_button.place(
-            x = (max_width*6)//80,
-            y = (max_height*9)//10
-            )
-
-    next_image_button.place(
-            x = (max_width*32)//80,
-            y = (max_height*9)//10
             )
 
     folder_open_button.place(
