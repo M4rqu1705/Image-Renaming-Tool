@@ -6,7 +6,7 @@ import os
 
 def update_image_paths():
     global image_paths, widgets
-    
+
     image_paths = os.listdir('.')
 
     for path in range(len(image_paths)-1, -1, -1):
