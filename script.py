@@ -4,6 +4,14 @@ from PIL import Image, ImageTk
 import sys
 import os
 
+def fullscreen(*args):
+    root.bind('<F10>', exitfullscreen)
+    root.overrideredirect(True)
+
+def exitfullscreen(*args):
+    root.bind('<F10>', fullscreen)
+    root.overrideredirect(False)
+
 def update_image_paths():
     global image_paths, widgets
 
@@ -143,9 +151,9 @@ def main():
     root.bind('<Left>', previous_image)
     root.bind('<Right>', next_image)
     root.bind('<Control-o>', folder_dialog)
+    root.bind('<F10>', fullscreen)
 
     max_width, max_height = root.maxsize()
-    print(max_width, ",", max_height)
     desired_size = max_height
 
     # DECORATIVE FRAMES
